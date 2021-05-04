@@ -8,9 +8,11 @@ The latter has not been implemented yet. Feel free to add it.
 
 # std
 import logging
+import os.path
 import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
+from subprocess import Popen
 from threading import Thread
 from typing import List, Optional
 
@@ -60,6 +62,7 @@ class FileLogConsumer(LogConsumer):
         self._is_running = True
         self._thread = Thread(target=self._consume_loop)
         self._thread.start()
+        self._log_size = 0
 
     def stop(self):
         logging.info("Stopping")
@@ -69,15 +72,36 @@ class FileLogConsumer(LogConsumer):
         expanded_user_log_path = self._log_path.expanduser()
         logging.info(f"Consuming log file from {expanded_user_log_path}")
 
-        if is_win_platform():
-            consume_command_args = ["powershell.exe", "get-content", expanded_user_log_path, "-tail", "1", "-wait"]
-        else:
-            consume_command_args = ["tail", "-F", expanded_user_log_path]
+        f = self._open_log(expanded_user_log_path)
 
-        f = subprocess.Popen(consume_command_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         while self._is_running:
+            if is_win_platform():
+                if self._has_rotated(expanded_user_log_path):
+                    logging.info(f"Encountered a log rotation, reopening file handler for {expanded_user_log_path}")
+                    f = self._open_log(expanded_user_log_path)
+
             log_line = f.stdout.readline().decode(encoding="utf-8")
             self._notify_subscribers(log_line)
+
+    def _has_rotated(self, path: Path) -> bool:
+
+        try:
+            old_size = self._log_size
+            self._log_size = os.path.getsize(path)
+        except OSError:
+            logging.warning(f"Encountered an error reading file size from {path}. This may be due to log file rotation")
+            return False
+
+        return old_size > self._log_size
+
+    def _open_log(self, path: Path) -> Popen:
+
+        if is_win_platform():
+            consume_command_args = ["powershell.exe", "get-content", path, "-tail", "1", "-wait"]
+        else:
+            consume_command_args = ["tail", "-F", path]
+
+        return subprocess.Popen(consume_command_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 class NetworkLogConsumer(LogConsumer):
