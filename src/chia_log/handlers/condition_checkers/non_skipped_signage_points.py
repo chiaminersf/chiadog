@@ -1,5 +1,6 @@
 # std
 import logging
+import os
 from datetime import datetime
 from typing import Optional
 
@@ -42,7 +43,8 @@ class NonSkippedSignagePoints(FinishedSignageConditionChecker):
                 if minutes_since_last_skip > 60:
                     logging.info("No other skips in the last 60 minutes. Can be safely ignored.")
                 else:
-                    message = "Experiencing networking issues? Skipped 2+ signage points in the last hour."
+                    machine_name = os.uname()[1]
+                    message = f"Experiencing networking issues? Skipped 2+ signage points in the last hour in {machine_name}"
                     logging.warning(message)
                     event = Event(
                         type=EventType.USER,
@@ -52,7 +54,8 @@ class NonSkippedSignagePoints(FinishedSignageConditionChecker):
                     )
 
         if skipped >= 2:
-            message = f"Experiencing networking issues? Skipped {skipped} signage points!"
+            machine_name = os.uname()[1]
+            message = f"Experiencing networking issues? Skipped {skipped} signage points in {machine_name}!"
             logging.warning(message)
             event = Event(
                 type=EventType.USER,
