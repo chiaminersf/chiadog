@@ -1,5 +1,6 @@
 # std
 import logging
+import os
 from typing import Optional
 
 # project
@@ -31,11 +32,12 @@ class TimeSinceLastFarmEvent(HarvesterConditionChecker):
 
         event = None
         seconds_since_last = (obj.timestamp - self._last_timestamp).seconds
+        machine_name = os.uname()[1]
 
         if seconds_since_last > self._warning_threshold:
             message = (
                 f"Experiencing networking issues? Harvester did not participate in any challenge "
-                f"for {seconds_since_last} seconds. It's now working again."
+                f"for {seconds_since_last} seconds in {machine_name}. It's now working again."
             )
             logging.warning(message)
             event = Event(
@@ -44,7 +46,7 @@ class TimeSinceLastFarmEvent(HarvesterConditionChecker):
         elif seconds_since_last > self._info_threshold:
             # This threshold seems to be surpassed multiple times per day
             # on the current network. So it only generates an INFO log.
-            logging.info(f"Last farming event was {seconds_since_last} seconds ago. This is unusual.")
+            logging.info(f"Last farming event was {seconds_since_last} seconds ago in {machine_name}. This is unusual.")
 
         self._last_timestamp = obj.timestamp
         return event
