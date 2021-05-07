@@ -1,5 +1,6 @@
 # std
 import logging
+import os
 import urllib.request
 from datetime import datetime
 from threading import Thread
@@ -63,6 +64,7 @@ class KeepAliveMonitor:
         and continuously checks that keep-alive events have been received
         """
         last_check = datetime.now()
+        machine_name = os.uname()[1]
 
         while self._is_running:
             sleep(1)  # Not sleeping entire check period so we can interrupt
@@ -77,7 +79,7 @@ class KeepAliveMonitor:
                 logging.debug(f"Keep-alive check for {service.name}: Last activity {seconds_since_last} seconds ago.")
                 if seconds_since_last > self._last_keep_alive_threshold_seconds[service]:
                     message = (
-                        f"Your harvester appears to be offline! "
+                        f"Your harvester appears to be offline in {machine_name}! "
                         f"No events for the past {seconds_since_last} seconds."
                     )
                     logging.warning(message)
