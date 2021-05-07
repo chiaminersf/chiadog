@@ -1,5 +1,6 @@
 # std
 import logging
+import os
 from typing import Optional
 
 # project
@@ -25,9 +26,10 @@ class NonDecreasingPlots(HarvesterConditionChecker):
 
         event = None
         if obj.total_plots_count < self._max_farmed_plots:
+            machine_name = os.uname()[1]
             message = (
                 f"Disconnected HDD? The total plot count decreased from "
-                f"{self._max_farmed_plots} to {obj.total_plots_count}."
+                f"{self._max_farmed_plots} to {obj.total_plots_count} in {machine_name}."
             )
             logging.warning(message)
             event = Event(
