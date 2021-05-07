@@ -24,6 +24,7 @@ class DummyEvents:
 
     @staticmethod
     def get_normal_priority_events():
+        machine_name = os.uname()[1]
         return [
             Event(
                 type=EventType.USER,
@@ -35,6 +36,7 @@ class DummyEvents:
 
     @staticmethod
     def get_high_priority_events():
+        machine_name = os.uname()[1]
         return [
             Event(
                 type=EventType.USER,
