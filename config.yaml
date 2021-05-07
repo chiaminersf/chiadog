@@ -72,4 +72,4 @@ notifier:
     enable: true
     daily_stats: true
     credentials:
-      webhook_url: 'https://hooks.slack.com/services/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'
+      webhook_url: 'https://hooks.slack.com/services/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'
