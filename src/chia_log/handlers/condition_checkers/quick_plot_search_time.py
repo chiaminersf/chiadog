@@ -1,5 +1,6 @@
 # std
 import logging
+import os
 from typing import Optional
 
 # project
@@ -20,7 +21,8 @@ class QuickPlotSearchTime(HarvesterConditionChecker):
 
     def check(self, obj: HarvesterActivityMessage) -> Optional[Event]:
         if obj.search_time_seconds > self._warning_threshold:
-            message = f"Seeking plots took too long: {obj.search_time_seconds} seconds!"
+            machine_name = os.uname()[1]
+            message = f"Seeking plots took too long: {obj.search_time_seconds} seconds in {machine_name}!"
             logging.warning(message)
             return Event(
                 type=EventType.USER, priority=EventPriority.NORMAL, service=EventService.HARVESTER, message=message
