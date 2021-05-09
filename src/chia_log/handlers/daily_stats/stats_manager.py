@@ -1,5 +1,6 @@
 # std
 import logging
+import os
 from datetime import datetime, timedelta
 from typing import List
 from threading import Thread
@@ -72,7 +73,8 @@ class StatsManager:
                     stat_acc.consume(obj)
 
     def _send_daily_notification(self):
-        summary = "Hello farmer! 👋 Here's what happened in the last 24 hours:\n"
+        machine_name = os.uname()[1]
+        summary = f"Hello farmer {machine_name}! 👋 Here's what happened in the last 24 hours:\n"
         for stat_acc in self._stat_accumulators:
             summary += "\n" + stat_acc.get_summary()
             stat_acc.reset()
